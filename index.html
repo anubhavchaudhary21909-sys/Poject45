@@ -16,50 +16,97 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <style>
+:root {
+  --bg1: #041024;
+  --bg2: #071226;
+  --glass: rgba(255,255,255,0.06);
+  --accent: #10b981;
+  --card-bg: rgba(255,255,255,0.05);
+}
+
+body {
+  background: linear-gradient(180deg, var(--bg1), var(--bg2));
+}
+
+/* Banner */
 .banner-slide {
   width: 100%;
   height: 180px;
   object-fit: cover;
-  border-radius: 12px;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
 }
+
+/* Glass Cards */
 .card {
-  background-color: #1f1f1f;
-  border-radius: 12px;
-  box-shadow: 0 0 12px rgba(0,0,0,0.4);
+  background: var(--card-bg);
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(3, 6, 12, 0.6);
   overflow: hidden;
+  border: 1px solid var(--glass);
+  transition: .3s;
 }
+.card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(16,185,129,0.4);
+}
+
 .poster {
   width: 100%;
   height: 160px;
   object-fit: cover;
 }
+
+/* Tab Buttons */
+.tab-btn {
+  border-radius: 10px;
+  padding: 8px 16px;
+  background: linear-gradient(90deg, #0ea5a4, #10b981);
+  color: #071226;
+  font-weight: 600;
+}
+.tab-btn:hover {
+  opacity: .9;
+  transform: translateY(-2px);
+}
+
+/* Links */
+.open-link {
+  display: inline-block;
+  padding: 8px 12px;
+  margin-top: 10px;
+  background: linear-gradient(90deg, #0ea5a4, #10b981);
+  color: #071226;
+  border-radius: 10px;
+  font-weight: 600;
+}
 </style>
 </head>
 
-<body class="bg-black text-white">
+<body class="text-white">
 
-<!-- Header -->
-<header class="p-4 text-center text-2xl font-bold">
+<!-- HEADER -->
+<header class="p-4 text-center text-3xl font-bold text-emerald-400">
   Project 45 – Study Resources
 </header>
 
-<!-- Banner Slider -->
+<!-- BANNERS -->
 <div id="banner-area" class="p-4 space-y-4"></div>
 
-<!-- Category Selector -->
+<!-- CATEGORY SELECTOR -->
 <div class="p-4">
   <label class="text-gray-300 text-lg">Select Category:</label>
-  <select id="category-filter" class="w-full p-2 rounded bg-gray-800 text-white mt-1"></select>
+  <select id="category-filter" class="w-full p-3 rounded bg-[#0d1a33] border border-[#1a2747] text-white mt-2"></select>
 </div>
 
-<!-- Section Tabs -->
+<!-- TABS -->
 <div class="flex justify-center gap-4 my-4">
-  <button class="tab-btn px-4 py-2 bg-blue-600 rounded" onclick="showSection('projects')">Projects</button>
-  <button class="tab-btn px-4 py-2 bg-green-600 rounded" onclick="showSection('notes')">Notes</button>
-  <button class="tab-btn px-4 py-2 bg-yellow-600 rounded" onclick="showSection('dpp')">DPP</button>
+  <button class="tab-btn" onclick="showSection('projects')">Projects</button>
+  <button class="tab-btn" onclick="showSection('notes')">Notes</button>
+  <button class="tab-btn" onclick="showSection('dpp')">DPP</button>
 </div>
 
-<!-- MAIN CONTENT -->
+<!-- CONTENT -->
 <div class="p-4">
 
   <!-- PROJECTS -->
@@ -109,33 +156,33 @@ function showSection(sec) {
 
 // ---------------- BANNERS ----------------
 function loadBanners() {
-  const bannerArea = document.getElementById("banner-area");
-  bannerArea.innerHTML = "";
+  const area = document.getElementById("banner-area");
+  area.innerHTML = "";
 
   db.ref("banners").once("value").then(snap => {
     snap.forEach(child => {
       const url = child.val().url;
-      bannerArea.innerHTML += `<img src="${url}" class="banner-slide">`;
+      area.innerHTML += `<img src="${url}" class="banner-slide">`;
     });
   });
 }
 
 // ---------------- CATEGORY DROPDOWN ----------------
 function loadCategories() {
-  const catSelect = document.getElementById("category-filter");
-  catSelect.innerHTML = `<option value="">All Categories</option>`;
+  const select = document.getElementById("category-filter");
+  select.innerHTML = `<option value="">All Categories</option>`;
 
   db.ref("categories").once("value").then(snap => {
     snap.forEach(child => {
       const name = child.val().name;
       allCategories[child.key] = name;
-      catSelect.innerHTML += `<option value="${name}">${name}</option>`;
+      select.innerHTML += `<option value="${name}">${name}</option>`;
     });
 
     renderAll();
   });
 
-  catSelect.addEventListener("change", renderAll);
+  select.addEventListener("change", renderAll);
 }
 
 // ---------------- PROJECTS ----------------
@@ -151,10 +198,10 @@ function renderProjects() {
     list.innerHTML += `
       <div class="card">
         <img src="${p.poster}" class="poster">
-        <div class="p-2">
+        <div class="p-3">
           <p class="font-bold">${p.title}</p>
           <p class="text-gray-400 text-sm">${p.year}</p>
-          <a href="${p.link}" target="_blank" class="text-blue-400 block mt-2">Open</a>
+          <a href="${p.link}" target="_blank" class="open-link">Open</a>
         </div>
       </div>
     `;
@@ -174,7 +221,7 @@ function renderNotes() {
     list.innerHTML += `
       <div class="card p-3">
         <p class="font-bold">${n.title}</p>
-        <a href="${n.link}" target="_blank" class="text-green-400 mt-2 block">Open Notes</a>
+        <a href="${n.link}" target="_blank" class="open-link">Open Notes</a>
       </div>
     `;
   });
@@ -193,13 +240,13 @@ function renderDpp() {
     list.innerHTML += `
       <div class="card p-3">
         <p class="font-bold">${d.title}</p>
-        <a href="${d.link}" target="_blank" class="text-yellow-300 mt-2 block">Open DPP</a>
+        <a href="${d.link}" target="_blank" class="open-link">Open DPP</a>
       </div>
     `;
   });
 }
 
-// ---------------- LIVE LOAD ----------------
+// ---------------- LIVE DATA ----------------
 function startLive() {
   db.ref("projects").on("value", snap => {
     allProjects = snap.val() || {};
