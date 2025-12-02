@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Project 45 – Study Material</title>
 
-<!-- Tailwind CDN -->
+<!-- Tailwind -->
 <script src="https://cdn.tailwindcss.com"></script>
 
 <!-- Icons -->
@@ -34,22 +34,17 @@ body {
   height: 180px;
   object-fit: cover;
   border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
 }
 
-/* Glass Cards */
+/* Cards */
 .card {
   background: var(--card-bg);
   border-radius: 16px;
-  box-shadow: 0 20px 50px rgba(3, 6, 12, 0.6);
   overflow: hidden;
   border: 1px solid var(--glass);
   transition: .3s;
 }
-.card:hover {
-  transform: translateY(-8px);
-  border-color: rgba(16,185,129,0.4);
-}
+.card:hover { transform: translateY(-6px); }
 
 .poster {
   width: 100%;
@@ -57,35 +52,28 @@ body {
   object-fit: cover;
 }
 
-/* Tab Buttons */
 .tab-btn {
   border-radius: 10px;
   padding: 8px 16px;
-  background: linear-gradient(90deg, #0ea5a4, #10b981);
-  color: #071226;
-  font-weight: 600;
-}
-.tab-btn:hover {
-  opacity: .9;
-  transform: translateY(-2px);
+  background: linear-gradient(90deg,#0ea5a4,#10b981);
+  color:#071226;
+  font-weight:600;
 }
 
-/* Links */
 .open-link {
-  display: inline-block;
-  padding: 8px 12px;
-  margin-top: 10px;
-  background: linear-gradient(90deg, #0ea5a4, #10b981);
-  color: #071226;
-  border-radius: 10px;
-  font-weight: 600;
+  display:inline-block;
+  padding:8px 12px;
+  background:linear-gradient(90deg,#0ea5a4,#10b981);
+  color:#071226;
+  margin-top:10px;
+  border-radius:8px;
+  font-weight:600;
 }
 </style>
 </head>
 
 <body class="text-white">
 
-<!-- HEADER -->
 <header class="p-4 text-center text-3xl font-bold text-emerald-400">
   Project 45 – Study Resources
 </header>
@@ -93,7 +81,7 @@ body {
 <!-- BANNERS -->
 <div id="banner-area" class="p-4 space-y-4"></div>
 
-<!-- CATEGORY SELECTOR -->
+<!-- CATEGORY SELECT -->
 <div class="p-4">
   <label class="text-gray-300 text-lg">Select Category:</label>
   <select id="category-filter" class="w-full p-3 rounded bg-[#0d1a33] border border-[#1a2747] text-white mt-2"></select>
@@ -106,7 +94,6 @@ body {
   <button class="tab-btn" onclick="showSection('dpp')">DPP</button>
 </div>
 
-<!-- CONTENT -->
 <div class="p-4">
 
   <!-- PROJECTS -->
@@ -143,139 +130,137 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let allCategories = {};
-let allProjects = {};
-let allNotes = {};
-let allDpp = {};
+let allCategories={}, allProjects={}, allNotes={}, allDpp={};
 
-// ---------------- SECTIONS ----------------
-function showSection(sec) {
+// ----------- SECTION SWITCH -----------
+function showSection(sec){
   document.querySelectorAll(".section").forEach(s => s.classList.add("hidden"));
-  document.getElementById(sec + "-section").classList.remove("hidden");
+  document.getElementById(sec+"-section").classList.remove("hidden");
 }
 
-// ---------------- BANNERS ----------------
-function loadBanners() {
-  const area = document.getElementById("banner-area");
-  area.innerHTML = "";
+// ----------- BANNERS -----------
+function loadBanners(){
+  const area=document.getElementById("banner-area");
+  area.innerHTML="";
 
-  db.ref("banners").once("value").then(snap => {
-    snap.forEach(child => {
-      const url = child.val().url;
-      area.innerHTML += `<img src="${url}" class="banner-slide">`;
+  db.ref("banners").on("value",snap=>{
+    area.innerHTML="";
+    snap.forEach(child=>{
+      const url=child.val().url;
+      area.innerHTML+=`<img src="${url}" class="banner-slide">`;
     });
   });
 }
 
-// ---------------- CATEGORY DROPDOWN ----------------
-function loadCategories() {
-  const select = document.getElementById("category-filter");
-  select.innerHTML = `<option value="">All Categories</option>`;
+// ----------- CATEGORY DROPDOWN -----------
+function loadCategories(){
+  const select=document.getElementById("category-filter");
+  select.innerHTML=`<option value="">All Categories</option>`;
 
-  db.ref("categories").once("value").then(snap => {
-    snap.forEach(child => {
-      const name = child.val().name;
-      allCategories[child.key] = name;
-      select.innerHTML += `<option value="${name}">${name}</option>`;
+  db.ref("categories").on("value",snap=>{
+    select.innerHTML=`<option value="">All Categories</option>`;
+    snap.forEach(child=>{
+      const name=child.val().name;
+      allCategories[child.key]=name;
+      select.innerHTML+=`<option value="${name}">${name}</option>`;
     });
-
     renderAll();
   });
 
-  select.addEventListener("change", renderAll);
+  select.addEventListener("change",renderAll);
 }
 
-// ---------------- PROJECTS ----------------
-function renderProjects() {
-  const list = document.getElementById("projects-list");
-  list.innerHTML = "";
+// ----------- PROJECTS -----------
+function renderProjects(){
+  const list=document.getElementById("projects-list");
+  const filter=document.getElementById("category-filter").value;
+  list.innerHTML="";
 
-  const filter = document.getElementById("category-filter").value;
-
-  Object.entries(allProjects).forEach(([id, p]) => {
-    if (filter && p.category !== filter) return;
+  Object.entries(allProjects).forEach(([id,p])=>{
+    if(filter && p.category!==filter) return;
 
     list.innerHTML += `
       <div class="card">
-        <img src="${p.poster}" class="poster">
+        <img src="${p.posterUrl}" class="poster">
         <div class="p-3">
           <p class="font-bold">${p.title}</p>
           <p class="text-gray-400 text-sm">${p.year}</p>
-          <a href="${p.link}" target="_blank" class="open-link">Open</a>
+
+          ${
+            p.watchLink
+            ? `<a href="${p.watchLink}" target="_blank" class="open-link">Watch</a>`
+            : ""
+          }
         </div>
       </div>
     `;
   });
 }
 
-// ---------------- NOTES ----------------
-function renderNotes() {
-  const list = document.getElementById("notes-list");
-  list.innerHTML = "";
+// ----------- NOTES -----------
+function renderNotes(){
+  const list=document.getElementById("notes-list");
+  const filter=document.getElementById("category-filter").value;
+  list.innerHTML="";
 
-  const filter = document.getElementById("category-filter").value;
+  Object.entries(allNotes).forEach(([id,n])=>{
+    if(filter && n.category!==filter) return;
 
-  Object.entries(allNotes).forEach(([id, n]) => {
-    if (filter && n.category !== filter) return;
-
-    list.innerHTML += `
+    list.innerHTML+=`
       <div class="card p-3">
         <p class="font-bold">${n.title}</p>
-        <a href="${n.link}" target="_blank" class="open-link">Open Notes</a>
+        <a href="${n.url}" target="_blank" class="open-link">Open Notes</a>
       </div>
     `;
   });
 }
 
-// ---------------- DPP ----------------
-function renderDpp() {
-  const list = document.getElementById("dpp-list");
-  list.innerHTML = "";
+// ----------- DPP -----------
+function renderDpp(){
+  const list=document.getElementById("dpp-list");
+  const filter=document.getElementById("category-filter").value;
+  list.innerHTML="";
 
-  const filter = document.getElementById("category-filter").value;
+  Object.entries(allDpp).forEach(([id,d])=>{
+    if(filter && d.category!==filter) return;
 
-  Object.entries(allDpp).forEach(([id, d]) => {
-    if (filter && d.category !== filter) return;
-
-    list.innerHTML += `
+    list.innerHTML+=`
       <div class="card p-3">
         <p class="font-bold">${d.title}</p>
-        <a href="${d.link}" target="_blank" class="open-link">Open DPP</a>
+        <a href="${d.url}" target="_blank" class="open-link">Open DPP</a>
       </div>
     `;
   });
 }
 
-// ---------------- LIVE DATA ----------------
-function startLive() {
-  db.ref("projects").on("value", snap => {
-    allProjects = snap.val() || {};
+// ----------- LIVE FIREBASE DATA -----------
+function startLive(){
+  db.ref("projects").on("value",snap=>{
+    allProjects=snap.val()||{};
     renderProjects();
   });
 
-  db.ref("notes").on("value", snap => {
-    allNotes = snap.val() || {};
+  db.ref("notes").on("value",snap=>{
+    allNotes=snap.val()||{};
     renderNotes();
   });
 
-  db.ref("dpp").on("value", snap => {
-    allDpp = snap.val() || {};
+  db.ref("dpp").on("value",snap=>{
+    allDpp=snap.val()||{};
     renderDpp();
   });
 }
 
-// ---------------- RENDER ALL ----------------
-function renderAll() {
+function renderAll(){
   renderProjects();
   renderNotes();
   renderDpp();
 }
 
-// ---------------- INIT ----------------
+// ----------- INIT -----------
 loadBanners();
 loadCategories();
 startLive();
-
 </script>
 
 </body>
