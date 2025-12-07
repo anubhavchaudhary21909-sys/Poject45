@@ -15,6 +15,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
+<!-- Notification Bell Icon CSS -->
 <style>
 :root {
   --bg1: #041024;
@@ -27,6 +28,153 @@
 body {
   background: linear-gradient(180deg, var(--bg1), var(--bg2));
   min-height: 100vh;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* Notification Bell */
+.notification-bell {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+}
+
+.notification-bell:hover {
+  transform: scale(1.1);
+  background: rgba(16, 185, 129, 0.3);
+}
+
+.notification-bell i {
+  font-size: 22px;
+  color: #10b981;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+/* Notification Panel */
+.notification-panel {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 999;
+  width: 350px;
+  max-height: 500px;
+  overflow-y: auto;
+  background: rgba(15, 27, 51, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  display: none;
+}
+
+.notification-header {
+  padding: 15px;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notification-header h3 {
+  font-weight: 600;
+  color: #10b981;
+  font-size: 18px;
+}
+
+.clear-all-btn {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.clear-all-btn:hover {
+  background: rgba(239, 68, 68, 0.3);
+}
+
+.notification-list {
+  padding: 10px;
+}
+
+.notification-item {
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-left: 4px solid #10b981;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.notification-item.unread {
+  background: rgba(16, 185, 129, 0.1);
+  border-left-color: #f59e0b;
+}
+
+.notification-title {
+  font-weight: 600;
+  color: #e2e8f0;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.notification-message {
+  color: #94a3b8;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.notification-time {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 8px;
+  text-align: right;
+}
+
+.no-notifications {
+  text-align: center;
+  padding: 30px;
+  color: #94a3b8;
 }
 
 /* Banner */
@@ -319,10 +467,56 @@ body {
   border: none;
   width: 100%;
 }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .notification-panel {
+    width: calc(100vw - 40px);
+    right: 10px;
+    left: 10px;
+  }
+  
+  .notification-bell {
+    top: 10px;
+    right: 10px;
+    width: 45px;
+    height: 45px;
+  }
+  
+  .lectures-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+}
 </style>
 </head>
 
 <body class="text-white">
+
+<!-- Notification Bell -->
+<div class="notification-bell" onclick="toggleNotificationPanel()">
+  <i class="fas fa-bell"></i>
+  <div id="notification-badge" class="notification-badge" style="display: none;">0</div>
+</div>
+
+<!-- Notification Panel -->
+<div id="notification-panel" class="notification-panel">
+  <div class="notification-header">
+    <h3>Notifications</h3>
+    <button onclick="clearAllNotifications()" class="clear-all-btn">
+      Clear All
+    </button>
+  </div>
+  <div id="notification-list" class="notification-list">
+    <div class="no-notifications">
+      <i class="fas fa-bell-slash text-3xl mb-3"></i>
+      <p>No notifications yet</p>
+    </div>
+  </div>
+</div>
 
 <header class="p-4 text-center text-3xl font-bold text-emerald-400">
   Project 45 – Study Resources
@@ -450,9 +644,142 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 let allCategories = {}, allProjects = {}, allNotes = {}, allDpp = {}, allLectures = {};
+let allNotifications = {};
+let unreadNotifications = 0;
 
 // Store lecture to play when switching to lecture tab
 let lectureToPlay = null;
+
+// Notification Functions
+function toggleNotificationPanel() {
+  const panel = document.getElementById('notification-panel');
+  if (panel.style.display === 'block') {
+    panel.style.display = 'none';
+  } else {
+    panel.style.display = 'block';
+    // Mark all as read when opened
+    markAllAsRead();
+  }
+}
+
+function markAllAsRead() {
+  unreadNotifications = 0;
+  updateNotificationBadge();
+  
+  // Update UI to remove unread styling
+  document.querySelectorAll('.notification-item.unread').forEach(item => {
+    item.classList.remove('unread');
+  });
+}
+
+function clearAllNotifications() {
+  if (confirm('Clear all notifications?')) {
+    // In a real app, you might want to archive them instead
+    document.getElementById('notification-list').innerHTML = `
+      <div class="no-notifications">
+        <i class="fas fa-bell-slash text-3xl mb-3"></i>
+        <p>No notifications yet</p>
+      </div>
+    `;
+    unreadNotifications = 0;
+    updateNotificationBadge();
+  }
+}
+
+function updateNotificationBadge() {
+  const badge = document.getElementById('notification-badge');
+  if (unreadNotifications > 0) {
+    badge.style.display = 'flex';
+    badge.textContent = unreadNotifications > 99 ? '99+' : unreadNotifications;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function showNotification(title, message) {
+  // Create notification item
+  const notificationList = document.getElementById('notification-list');
+  
+  // Remove "no notifications" message if present
+  const noNotifications = notificationList.querySelector('.no-notifications');
+  if (noNotifications) {
+    noNotifications.remove();
+  }
+  
+  // Format time
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
+  
+  // Create notification element
+  const notificationDiv = document.createElement('div');
+  notificationDiv.className = 'notification-item unread';
+  notificationDiv.innerHTML = `
+    <div class="notification-title">${title}</div>
+    <div class="notification-message">${message}</div>
+    <div class="notification-time">${timeStr}</div>
+  `;
+  
+  // Add to top of list
+  notificationList.insertBefore(notificationDiv, notificationList.firstChild);
+  
+  // Update badge
+  unreadNotifications++;
+  updateNotificationBadge();
+  
+  // Show desktop notification if supported
+  if ("Notification" in window && Notification.permission === "granted") {
+    new Notification(title, { body: message, icon: '/favicon.ico' });
+  }
+  
+  // Auto-remove after 10 seconds if not opened
+  setTimeout(() => {
+    if (notificationDiv.classList.contains('unread')) {
+      notificationDiv.classList.remove('unread');
+    }
+  }, 10000);
+}
+
+// Request notification permission
+function requestNotificationPermission() {
+  if ("Notification" in window) {
+    if (Notification.permission === "default") {
+      Notification.requestPermission().then(permission => {
+        console.log("Notification permission:", permission);
+      });
+    }
+  }
+}
+
+// Check for scheduled notifications
+function checkScheduledNotifications() {
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  
+  Object.values(allNotifications || {}).forEach(notification => {
+    if (notification.active && 
+        notification.hour === currentHour && 
+        notification.minute === currentMinute) {
+      
+      // Check if we already showed this notification today
+      const lastShownKey = `last_shown_${notification.hour}_${notification.minute}`;
+      const lastShown = localStorage.getItem(lastShownKey);
+      const today = now.toDateString();
+      
+      if (lastShown !== today) {
+        // Show notification
+        showNotification(notification.title, notification.message);
+        
+        // Store that we showed it today
+        localStorage.setItem(lastShownKey, today);
+      }
+    }
+  });
+}
 
 function showSection(sec){
   // Update tab buttons
@@ -778,7 +1105,63 @@ function startLive() {
     }
   });
 
+  // Load notifications
+  db.ref("notifications").on("value", snap => {
+    allNotifications = snap.val() || {};
+    
+    // Load existing notifications from localStorage
+    loadSavedNotifications();
+    
+    // Start checking for scheduled notifications
+    setInterval(checkScheduledNotifications, 60000); // Check every minute
+  });
+
   firstLoad = false;
+}
+
+// Load saved notifications from localStorage
+function loadSavedNotifications() {
+  const saved = localStorage.getItem('project45_notifications');
+  if (saved) {
+    try {
+      const notifications = JSON.parse(saved);
+      const notificationList = document.getElementById('notification-list');
+      
+      if (notifications.length > 0) {
+        notificationList.innerHTML = '';
+        notifications.forEach(notif => {
+          const div = document.createElement('div');
+          div.className = 'notification-item';
+          if (notif.unread) div.classList.add('unread');
+          
+          div.innerHTML = `
+            <div class="notification-title">${notif.title}</div>
+            <div class="notification-message">${notif.message}</div>
+            <div class="notification-time">${notif.time}</div>
+          `;
+          
+          notificationList.appendChild(div);
+        });
+      }
+    } catch (e) {
+      console.error('Error loading saved notifications:', e);
+    }
+  }
+}
+
+// Save notifications to localStorage
+function saveNotifications() {
+  const notifications = [];
+  document.querySelectorAll('.notification-item').forEach(item => {
+    const title = item.querySelector('.notification-title').textContent;
+    const message = item.querySelector('.notification-message').textContent;
+    const time = item.querySelector('.notification-time').textContent;
+    const unread = item.classList.contains('unread');
+    
+    notifications.push({ title, message, time, unread });
+  });
+  
+  localStorage.setItem('project45_notifications', JSON.stringify(notifications));
 }
 
 function renderAll() {
@@ -921,6 +1304,9 @@ window.onload = function() {
   // Show projects by default
   showSection('projects');
   
+  // Request notification permission
+  requestNotificationPermission();
+  
   // Add error handling for popup image
   document.getElementById('popup-thumb').onerror = function() {
     this.src = "https://via.placeholder.com/350x180/0f1b33/10b981?text=Content+Added";
@@ -932,6 +1318,23 @@ window.onload = function() {
       e.target.src = 'https://via.placeholder.com/300x180/0f1b33/10b981?text=Lecture';
     }
   }, true);
+  
+  // Close notification panel when clicking outside
+  document.addEventListener('click', function(event) {
+    const panel = document.getElementById('notification-panel');
+    const bell = document.querySelector('.notification-bell');
+    
+    if (panel.style.display === 'block' && 
+        !panel.contains(event.target) && 
+        !bell.contains(event.target)) {
+      panel.style.display = 'none';
+    }
+  });
+  
+  // Test notification (can be removed)
+  setTimeout(() => {
+    showNotification("Welcome to Project 45!", "Start exploring study resources and lectures. Good luck with your preparation!");
+  }, 2000);
 };
 </script>
 
