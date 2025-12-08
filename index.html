@@ -15,7 +15,6 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-<!-- Notification Bell Icon CSS -->
 <style>
 :root {
   --bg1: #041024;
@@ -31,7 +30,7 @@ body {
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
-/* Notification Bell */
+/* Notification System */
 .notification-bell {
   position: fixed;
   top: 20px;
@@ -67,13 +66,14 @@ body {
   background: #ef4444;
   color: white;
   border-radius: 50%;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   font-size: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
+  border: 2px solid var(--bg1);
 }
 
 /* Notification Panel */
@@ -82,99 +82,175 @@ body {
   top: 80px;
   right: 20px;
   z-index: 999;
-  width: 350px;
+  width: 380px;
   max-height: 500px;
   overflow-y: auto;
-  background: rgba(15, 27, 51, 0.95);
-  backdrop-filter: blur(10px);
+  background: rgba(15, 27, 51, 0.98);
+  backdrop-filter: blur(20px);
   border: 1px solid rgba(16, 185, 129, 0.3);
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
   display: none;
 }
 
 .notification-header {
-  padding: 15px;
+  padding: 18px;
   border-bottom: 1px solid rgba(16, 185, 129, 0.3);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 16px 16px 0 0;
 }
 
 .notification-header h3 {
-  font-weight: 600;
+  font-weight: 700;
   color: #10b981;
   font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.clear-all-btn {
-  background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  padding: 5px 10px;
-  border-radius: 6px;
+.notification-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.clear-all-btn, .mark-read-btn {
+  background: rgba(30, 41, 59, 0.8);
+  color: #94a3b8;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  padding: 6px 12px;
+  border-radius: 8px;
   font-size: 12px;
   cursor: pointer;
   transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .clear-all-btn:hover {
-  background: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.mark-read-btn:hover {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.4);
 }
 
 .notification-list {
-  padding: 10px;
+  padding: 0;
 }
 
 .notification-item {
-  background: rgba(30, 41, 59, 0.5);
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 10px;
-  border-left: 4px solid #10b981;
-  animation: slideIn 0.3s ease;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  transition: all 0.3s;
+  cursor: pointer;
+  position: relative;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item:hover {
+  background: rgba(16, 185, 129, 0.05);
 }
 
 .notification-item.unread {
-  background: rgba(16, 185, 129, 0.1);
-  border-left-color: #f59e0b;
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.08), transparent);
+  border-left: 4px solid #10b981;
+}
+
+.notification-item.unread::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.notification-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.notification-icon {
+  font-size: 20px;
+  margin-top: 2px;
+}
+
+.notification-text {
+  flex: 1;
 }
 
 .notification-title {
   font-weight: 600;
   color: #e2e8f0;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
   font-size: 14px;
+  line-height: 1.4;
 }
 
 .notification-message {
   color: #94a3b8;
   font-size: 13px;
-  line-height: 1.4;
+  line-height: 1.5;
+}
+
+.notification-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
 }
 
 .notification-time {
   font-size: 11px;
   color: #64748b;
-  margin-top: 8px;
-  text-align: right;
+}
+
+.notification-type {
+  font-size: 11px;
+  padding: 2px 8px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border-radius: 12px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .no-notifications {
   text-align: center;
-  padding: 30px;
+  padding: 40px 20px;
   color: #94a3b8;
+}
+
+.no-notifications i {
+  font-size: 48px;
+  margin-bottom: 15px;
+  opacity: 0.5;
+}
+
+.no-notifications p {
+  font-size: 14px;
 }
 
 /* Banner */
@@ -203,17 +279,20 @@ body {
 
 .tab-btn {
   border-radius: 10px;
-  padding: 8px 16px;
+  padding: 10px 20px;
   background: #0f1b33;
   color: #e2e8f0;
   font-weight: 600;
   border: 1px solid #1f2d4d;
   transition: all 0.3s;
+  cursor: pointer;
+  font-size: 14px;
 }
 
 .tab-btn.active {
   background: linear-gradient(90deg,#0ea5a4,#10b981);
   color: #071226;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
 .open-link {
@@ -225,24 +304,14 @@ body {
   border-radius:8px;
   font-weight:600;
   cursor: pointer;
+  text-decoration: none;
+  text-align: center;
 }
 
 /* LECTURE PLAYER STYLES */
 .lecture-player-section {
   max-width: 1200px;
   margin: 0 auto;
-}
-
-.lecture-controls {
-  background: #0f1b33;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 20px;
-  border: 1px solid #1f2d4d;
-}
-
-.lecture-input-section {
-  display: none; /* Hidden as requested */
 }
 
 .lecture-player-container {
@@ -252,7 +321,7 @@ body {
   margin-bottom: 20px;
   border: 2px solid #1f2d4d;
   position: relative;
-  aspect-ratio: 16 / 9; /* 16:9 aspect ratio */
+  aspect-ratio: 16 / 9;
   width: 100%;
 }
 
@@ -366,7 +435,7 @@ body {
 }
 
 .play-lecture-btn {
-  padding: 8px 20px;
+  padding: 10px 20px;
   background: linear-gradient(90deg,#0ea5a4,#10b981);
   color: #071226;
   border: none;
@@ -458,7 +527,7 @@ body {
 }
 .close-btn {
   margin-top: 20px;
-  padding: 10px 24px;
+  padding: 12px 24px;
   background: linear-gradient(90deg,#0ea5a4,#10b981);
   color: #0f1b33;
   border-radius: 10px;
@@ -466,10 +535,44 @@ body {
   cursor: pointer;
   border: none;
   width: 100%;
+  font-size: 16px;
+}
+
+/* Search */
+.search-container {
+  position: relative;
+  margin: 20px auto;
+  max-width: 600px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 14px 20px 14px 50px;
+  background: #0f1b33;
+  border: 1px solid #1f2d4d;
+  border-radius: 12px;
+  color: #e2e8f0;
+  font-size: 16px;
+  transition: all 0.3s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.search-icon {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 18px;
 }
 
 /* Responsive */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .notification-panel {
     width: calc(100vw - 40px);
     right: 10px;
@@ -490,6 +593,69 @@ body {
   .grid-cols-2 {
     grid-template-columns: 1fr;
   }
+  
+  .tab-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+}
+
+/* Notification Toast */
+.notification-toast {
+  position: fixed;
+  top: 90px;
+  right: 20px;
+  background: #0f1b33;
+  border: 1px solid #10b981;
+  border-radius: 12px;
+  padding: 15px;
+  width: 320px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  z-index: 1001;
+  animation: slideInRight 0.3s ease;
+  border-left: 4px solid #10b981;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.toast-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.toast-icon {
+  font-size: 20px;
+}
+
+.toast-title {
+  font-weight: 600;
+  color: #e2e8f0;
+  flex: 1;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.toast-message {
+  color: #94a3b8;
+  font-size: 14px;
+  line-height: 1.4;
 }
 </style>
 </head>
@@ -505,15 +671,21 @@ body {
 <!-- Notification Panel -->
 <div id="notification-panel" class="notification-panel">
   <div class="notification-header">
-    <h3>Notifications</h3>
-    <button onclick="clearAllNotifications()" class="clear-all-btn">
-      Clear All
-    </button>
+    <h3><i class="fas fa-bell"></i> Notifications</h3>
+    <div class="notification-actions">
+      <button onclick="markAllAsRead()" class="mark-read-btn">
+        <i class="fas fa-check"></i> Mark Read
+      </button>
+      <button onclick="clearAllNotifications()" class="clear-all-btn">
+        <i class="fas fa-trash"></i> Clear All
+      </button>
+    </div>
   </div>
   <div id="notification-list" class="notification-list">
     <div class="no-notifications">
-      <i class="fas fa-bell-slash text-3xl mb-3"></i>
+      <i class="fas fa-bell-slash"></i>
       <p>No notifications yet</p>
+      <p class="text-sm mt-2">You'll get notifications for study reminders and updates</p>
     </div>
   </div>
 </div>
@@ -522,11 +694,21 @@ body {
   Project 45 – Study Resources
 </header>
 
+<!-- Search Bar -->
+<div class="search-container px-4">
+  <div class="relative">
+    <input type="text" id="global-search" 
+           placeholder="Search projects, notes, lectures..." 
+           class="search-input">
+    <i class="fas fa-search search-icon"></i>
+  </div>
+</div>
+
 <!-- POPUP -->
 <div id="popup">
   <div class="popup-box">
-    <h2 class="text-xl font-bold mb-2">🎉 New Lecture Added!</h2>
-    <img id="popup-thumb" class="popup-thumb" src="https://via.placeholder.com/350x180/0f1b33/10b981?text=Lecture+Thumbnail">
+    <h2 class="text-xl font-bold mb-2">🎉 New Content Added!</h2>
+    <img id="popup-thumb" class="popup-thumb" src="https://via.placeholder.com/350x180/0f1b33/10b981?text=New+Content">
     <p id="popup-title" class="mt-3 text-lg font-semibold text-emerald-300"></p>
     <button class="close-btn" onclick="closePopup()">Continue</button>
   </div>
@@ -538,7 +720,9 @@ body {
 <!-- CATEGORY SELECT -->
 <div class="p-4">
   <label class="text-gray-300 text-lg">Select Category:</label>
-  <select id="category-filter" class="w-full p-3 rounded bg-[#0d1a33] border border-[#1a2747] text-white mt-2"></select>
+  <select id="category-filter" class="w-full p-3 rounded bg-[#0d1a33] border border-[#1a2747] text-white mt-2">
+    <option value="">All Categories</option>
+  </select>
 </div>
 
 <!-- TABS -->
@@ -554,26 +738,26 @@ body {
   <!-- PROJECTS -->
   <div id="projects-section" class="section">
     <h2 class="text-xl font-bold mb-4 text-emerald-300">Projects</h2>
-    <div id="projects-list" class="grid grid-cols-2 gap-4"></div>
+    <div id="projects-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
   </div>
 
   <!-- NOTES -->
   <div id="notes-section" class="section hidden">
     <h2 class="text-xl font-bold mb-4 text-emerald-300">Notes</h2>
-    <div id="notes-list" class="grid grid-cols-2 gap-4"></div>
+    <div id="notes-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
   </div>
 
   <!-- DPP -->
   <div id="dpp-section" class="section hidden">
     <h2 class="text-xl font-bold mb-4 text-emerald-300">Daily Practice Papers</h2>
-    <div id="dpp-list" class="grid grid-cols-2 gap-4"></div>
+    <div id="dpp-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
   </div>
 
   <!-- LECTURE PLAYER -->
   <div id="lecture-section" class="section hidden lecture-player-section">
     <h2 class="text-xl font-bold mb-6 text-emerald-300 text-center">Lecture Player</h2>
     
-    <!-- Hidden URL input (not visible to user) -->
+    <!-- Hidden URL input -->
     <div class="hidden-url">
       <input type="text" id="lectureUrl" value="">
     </div>
@@ -586,25 +770,25 @@ body {
     <!-- Speed Controls -->
     <div class="lecture-features">
       <button class="lecture-feature-btn" onclick="setPlaybackSpeed(0.75)">
-        0.75x
+        <i class="fas fa-tachometer-alt"></i> 0.75x
       </button>
       <button class="lecture-feature-btn active" onclick="setPlaybackSpeed(1)">
-        1x (Normal)
+        <i class="fas fa-tachometer-alt"></i> 1x Normal
       </button>
       <button class="lecture-feature-btn" onclick="setPlaybackSpeed(1.25)">
-        1.25x
+        <i class="fas fa-tachometer-alt"></i> 1.25x
       </button>
       <button class="lecture-feature-btn" onclick="setPlaybackSpeed(1.5)">
-        1.5x
+        <i class="fas fa-tachometer-alt"></i> 1.5x
       </button>
       <button class="lecture-feature-btn" onclick="setPlaybackSpeed(2)">
-        2x
+        <i class="fas fa-tachometer-alt"></i> 2x
       </button>
       <button class="lecture-feature-btn" onclick="skipBackward()">
-        -15s
+        <i class="fas fa-backward"></i> -15s
       </button>
       <button class="lecture-feature-btn" onclick="skipForward()">
-        +15s
+        <i class="fas fa-forward"></i> +15s
       </button>
     </div>
     
@@ -613,15 +797,15 @@ body {
       <div class="flex justify-between items-center mb-4">
         <h3 class="text-xl font-bold text-emerald-300">All Lectures <span id="lecture-count" class="lecture-count">0</span></h3>
         <div class="text-sm text-gray-400">
-          Click any lecture to play
+          <i class="fas fa-mouse-pointer mr-1"></i> Click any lecture to play
         </div>
       </div>
       <div id="lectures-grid-container" class="lectures-grid">
         <!-- All lectures will be loaded here from Firebase -->
         <div class="no-lectures">
           <i class="fas fa-video-slash text-4xl mb-3"></i>
-          <p>No lectures added yet. Add lectures in Firebase to see them here.</p>
-          <p class="text-sm mt-2">Add lectures in the "lectures" node in your Firebase database</p>
+          <p>No lectures added yet.</p>
+          <p class="text-sm mt-2">Check back soon for new lectures!</p>
         </div>
       </div>
     </div>
@@ -629,6 +813,8 @@ body {
 
 </div>
 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script>
 // ---------------- FIREBASE ----------------
 const firebaseConfig = {
@@ -646,9 +832,20 @@ const db = firebase.database();
 let allCategories = {}, allProjects = {}, allNotes = {}, allDpp = {}, allLectures = {};
 let allNotifications = {};
 let unreadNotifications = 0;
+let notificationHistory = [];
+let firstLoad = true;
 
 // Store lecture to play when switching to lecture tab
 let lectureToPlay = null;
+
+// Initialize notification badge from localStorage
+function initNotificationBadge() {
+  const saved = localStorage.getItem('project45_unread_count');
+  if (saved) {
+    unreadNotifications = parseInt(saved) || 0;
+    updateNotificationBadge();
+  }
+}
 
 // Notification Functions
 function toggleNotificationPanel() {
@@ -665,6 +862,7 @@ function toggleNotificationPanel() {
 function markAllAsRead() {
   unreadNotifications = 0;
   updateNotificationBadge();
+  localStorage.setItem('project45_unread_count', '0');
   
   // Update UI to remove unread styling
   document.querySelectorAll('.notification-item.unread').forEach(item => {
@@ -674,13 +872,9 @@ function markAllAsRead() {
 
 function clearAllNotifications() {
   if (confirm('Clear all notifications?')) {
-    // In a real app, you might want to archive them instead
-    document.getElementById('notification-list').innerHTML = `
-      <div class="no-notifications">
-        <i class="fas fa-bell-slash text-3xl mb-3"></i>
-        <p>No notifications yet</p>
-      </div>
-    `;
+    notificationHistory = [];
+    localStorage.setItem('project45_notifications', JSON.stringify([]));
+    renderNotificationsList();
     unreadNotifications = 0;
     updateNotificationBadge();
   }
@@ -696,89 +890,162 @@ function updateNotificationBadge() {
   }
 }
 
-function showNotification(title, message) {
-  // Create notification item
-  const notificationList = document.getElementById('notification-list');
-  
-  // Remove "no notifications" message if present
-  const noNotifications = notificationList.querySelector('.no-notifications');
-  if (noNotifications) {
-    noNotifications.remove();
+function showNotificationToast(title, message, icon = '🔔') {
+  // Remove existing toast
+  const existingToast = document.querySelector('.notification-toast');
+  if (existingToast) {
+    existingToast.remove();
   }
   
-  // Format time
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true
-  });
-  
-  // Create notification element
-  const notificationDiv = document.createElement('div');
-  notificationDiv.className = 'notification-item unread';
-  notificationDiv.innerHTML = `
-    <div class="notification-title">${title}</div>
-    <div class="notification-message">${message}</div>
-    <div class="notification-time">${timeStr}</div>
+  // Create toast
+  const toast = document.createElement('div');
+  toast.className = 'notification-toast';
+  toast.innerHTML = `
+    <div class="toast-header">
+      <span class="toast-icon">${icon}</span>
+      <span class="toast-title">${title}</span>
+      <button class="toast-close" onclick="this.parentElement.parentElement.remove()">×</button>
+    </div>
+    <div class="toast-message">${message}</div>
   `;
   
-  // Add to top of list
-  notificationList.insertBefore(notificationDiv, notificationList.firstChild);
+  document.body.appendChild(toast);
   
-  // Update badge
-  unreadNotifications++;
-  updateNotificationBadge();
-  
-  // Show desktop notification if supported
-  if ("Notification" in window && Notification.permission === "granted") {
-    new Notification(title, { body: message, icon: '/favicon.ico' });
-  }
-  
-  // Auto-remove after 10 seconds if not opened
+  // Auto remove after 5 seconds
   setTimeout(() => {
-    if (notificationDiv.classList.contains('unread')) {
-      notificationDiv.classList.remove('unread');
+    if (toast.parentNode) {
+      toast.remove();
     }
-  }, 10000);
+  }, 5000);
 }
 
-// Request notification permission
+function addNotificationToHistory(notification) {
+  const now = new Date();
+  const notificationObj = {
+    id: 'n_' + Date.now(),
+    title: notification.title,
+    message: notification.message,
+    icon: notification.icon || '🔔',
+    timestamp: notification.timestamp || Date.now(),
+    type: notification.type || 'scheduled',
+    read: false,
+    timeStr: now.toLocaleTimeString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    }),
+    dateStr: now.toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short'
+    })
+  };
+  
+  // Add to beginning of array (newest first)
+  notificationHistory.unshift(notificationObj);
+  
+  // Keep only last 100 notifications
+  if (notificationHistory.length > 100) {
+    notificationHistory = notificationHistory.slice(0, 100);
+  }
+  
+  // Save to localStorage
+  localStorage.setItem('project45_notifications', JSON.stringify(notificationHistory));
+  
+  // Update UI
+  unreadNotifications++;
+  updateNotificationBadge();
+  renderNotificationsList();
+  
+  // Show toast
+  showNotificationToast(notification.title, notification.message, notification.icon);
+  
+  // Request notification permission and show if granted
+  if ("Notification" in window && Notification.permission === "granted") {
+    new Notification(notification.title, { 
+      body: notification.message, 
+      icon: '/favicon.ico',
+      tag: 'project45_notification'
+    });
+  }
+}
+
+function renderNotificationsList() {
+  const list = document.getElementById('notification-list');
+  
+  if (notificationHistory.length === 0) {
+    list.innerHTML = `
+      <div class="no-notifications">
+        <i class="fas fa-bell-slash"></i>
+        <p>No notifications yet</p>
+        <p class="text-sm mt-2">You'll get notifications for study reminders and updates</p>
+      </div>
+    `;
+    return;
+  }
+  
+  list.innerHTML = '';
+  
+  notificationHistory.forEach(notification => {
+    const item = document.createElement('div');
+    item.className = `notification-item ${notification.read ? '' : 'unread'}`;
+    item.innerHTML = `
+      <div class="notification-content">
+        <div class="notification-icon">${notification.icon}</div>
+        <div class="notification-text">
+          <div class="notification-title">${notification.title}</div>
+          <div class="notification-message">${notification.message}</div>
+          <div class="notification-meta">
+            <div class="notification-time">${notification.dateStr} • ${notification.timeStr}</div>
+            <div class="notification-type">${notification.type}</div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    item.addEventListener('click', () => {
+      if (!notification.read) {
+        notification.read = true;
+        unreadNotifications = Math.max(0, unreadNotifications - 1);
+        updateNotificationBadge();
+        localStorage.setItem('project45_unread_count', unreadNotifications);
+        localStorage.setItem('project45_notifications', JSON.stringify(notificationHistory));
+        item.classList.remove('unread');
+      }
+    });
+    
+    list.appendChild(item);
+  });
+}
+
+function loadSavedNotifications() {
+  const saved = localStorage.getItem('project45_notifications');
+  if (saved) {
+    try {
+      notificationHistory = JSON.parse(saved) || [];
+      
+      // Count unread notifications
+      unreadNotifications = notificationHistory.filter(n => !n.read).length;
+      updateNotificationBadge();
+      
+      // Render list
+      renderNotificationsList();
+    } catch (e) {
+      console.error('Error loading saved notifications:', e);
+      notificationHistory = [];
+    }
+  }
+}
+
 function requestNotificationPermission() {
   if ("Notification" in window) {
     if (Notification.permission === "default") {
       Notification.requestPermission().then(permission => {
-        console.log("Notification permission:", permission);
+        if (permission === "granted") {
+          console.log("Notification permission granted");
+        }
       });
     }
   }
-}
-
-// Check for scheduled notifications
-function checkScheduledNotifications() {
-  const now = new Date();
-  const currentHour = now.getHours();
-  const currentMinute = now.getMinutes();
-  
-  Object.values(allNotifications || {}).forEach(notification => {
-    if (notification.active && 
-        notification.hour === currentHour && 
-        notification.minute === currentMinute) {
-      
-      // Check if we already showed this notification today
-      const lastShownKey = `last_shown_${notification.hour}_${notification.minute}`;
-      const lastShown = localStorage.getItem(lastShownKey);
-      const today = now.toDateString();
-      
-      if (lastShown !== today) {
-        // Show notification
-        showNotification(notification.title, notification.message);
-        
-        // Store that we showed it today
-        localStorage.setItem(lastShownKey, today);
-      }
-    }
-  });
 }
 
 function showSection(sec){
@@ -823,15 +1090,18 @@ function loadBanners(){
     snap.forEach(child => {
       const url = child.val().url;
       if(url) {
-        area.innerHTML += `<img src="${url}" class="banner-slide">`;
+        area.innerHTML += `<img src="${url}" class="banner-slide" onerror="this.src='https://via.placeholder.com/1200x300/0f1b33/10b981?text=Study+Resources'">`;
       }
     });
     
     // If no banners, show placeholder
     if(area.innerHTML === "") {
       area.innerHTML = `
-        <div class="banner-slide bg-gradient-to-r from-emerald-900 to-teal-800 flex items-center justify-center">
-          <p class="text-xl font-bold">Study Resources</p>
+        <div class="banner-slide bg-gradient-to-r from-emerald-900 to-teal-800 flex items-center justify-center rounded-2xl">
+          <div class="text-center">
+            <p class="text-2xl font-bold mb-2">Welcome to Project 45</p>
+            <p class="text-emerald-200">Study Resources & Lectures</p>
+          </div>
         </div>
       `;
     }
@@ -856,15 +1126,21 @@ function loadCategories(){
   select.addEventListener("change", renderAll);
 }
 
-// ----------- PROJECTS (WITH LECTURE LINKS) ----------- 
+// ----------- PROJECTS ----------- 
 function renderProjects(){
   const list = document.getElementById("projects-list");
   const filter = document.getElementById("category-filter").value;
+  const search = document.getElementById("global-search").value.toLowerCase();
   list.innerHTML = "";
+
+  let hasResults = false;
 
   Object.entries(allProjects).forEach(([id, p]) => {
     if(filter && p.category !== filter) return;
+    if(search && !p.title.toLowerCase().includes(search)) return;
 
+    hasResults = true;
+    
     // Check if this project has a video URL (lecture)
     const hasLecture = p.videoUrl || p.lectureUrl || p.watchLink;
     const videoId = extractVideoIdFromUrl(hasLecture);
@@ -872,21 +1148,29 @@ function renderProjects(){
     list.innerHTML += `
       <div class="card">
         <img src="${p.posterUrl || 'https://via.placeholder.com/300x160/0f1b33/10b981?text=Project'}" 
-             class="poster" alt="${p.title}">
+             class="poster" alt="${p.title}"
+             onerror="this.src='https://via.placeholder.com/300x160/0f1b33/10b981?text=Project'">
         <div class="p-3">
-          <p class="font-bold text-sm">${p.title}</p>
-          <p class="text-gray-400 text-xs mt-1">${p.year || ''}</p>
+          <p class="font-bold text-sm mb-1">${p.title}</p>
+          <p class="text-gray-400 text-xs mb-2">${p.year || ''} • ${p.category || 'General'}</p>
+          <p class="text-gray-300 text-xs mb-3 line-clamp-2">${p.description || ''}</p>
           ${hasLecture && videoId ? 
-            `<button onclick="playLectureFromHome('${videoId}', '${p.title.replace(/'/g, "\\'")}')" class="open-link text-xs w-full text-center">Watch Lecture</button>` : 
-            '<p class="text-gray-500 text-xs mt-2">No lecture available</p>'
+            `<button onclick="playLectureFromHome('${videoId}', '${p.title.replace(/'/g, "\\'")}')" class="open-link text-xs w-full">Watch Lecture</button>` : 
+            '<p class="text-gray-500 text-xs text-center py-2">No lecture available</p>'
           }
         </div>
       </div>
     `;
   });
   
-  if(list.innerHTML === "") {
-    list.innerHTML = `<p class="col-span-2 text-center text-gray-400 p-4">No projects found</p>`;
+  if(!hasResults) {
+    list.innerHTML = `
+      <div class="col-span-2 text-center p-8">
+        <i class="fas fa-search text-4xl text-gray-400 mb-3"></i>
+        <p class="text-gray-400">No projects found</p>
+        ${search ? '<p class="text-sm text-gray-500 mt-1">Try a different search term</p>' : ''}
+      </div>
+    `;
   }
 }
 
@@ -894,24 +1178,46 @@ function renderProjects(){
 function renderNotes(){
   const list = document.getElementById("notes-list");
   const filter = document.getElementById("category-filter").value;
+  const search = document.getElementById("global-search").value.toLowerCase();
   list.innerHTML = "";
+
+  let hasResults = false;
 
   Object.entries(allNotes).forEach(([id, n]) => {
     if(filter && n.category !== filter) return;
+    if(search && !n.title.toLowerCase().includes(search)) return;
+
+    hasResults = true;
 
     list.innerHTML += `
-      <div class="card p-3">
-        <p class="font-bold text-sm mb-2">${n.title}</p>
+      <div class="card p-4">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-12 h-12 bg-emerald-900 rounded-lg flex items-center justify-center">
+            <i class="fas fa-file-pdf text-emerald-300 text-xl"></i>
+          </div>
+          <div>
+            <p class="font-bold text-sm">${n.title}</p>
+            <p class="text-gray-400 text-xs">${n.category || 'General'}</p>
+          </div>
+        </div>
         ${n.url ? 
-          `<a href="${n.url}" target="_blank" class="open-link text-xs">Open Notes</a>` : 
-          '<p class="text-gray-500 text-xs">Link coming soon</p>'
+          `<a href="${n.url}" target="_blank" class="open-link text-xs flex items-center justify-center gap-2">
+            <i class="fas fa-external-link-alt"></i> Open Notes
+          </a>` : 
+          '<p class="text-gray-500 text-xs text-center">Link coming soon</p>'
         }
       </div>
     `;
   });
   
-  if(list.innerHTML === "") {
-    list.innerHTML = `<p class="col-span-2 text-center text-gray-400 p-4">No notes found</p>`;
+  if(!hasResults) {
+    list.innerHTML = `
+      <div class="col-span-2 text-center p-8">
+        <i class="fas fa-file-alt text-4xl text-gray-400 mb-3"></i>
+        <p class="text-gray-400">No notes found</p>
+        ${search ? '<p class="text-sm text-gray-500 mt-1">Try a different search term</p>' : ''}
+      </div>
+    `;
   }
 }
 
@@ -919,24 +1225,46 @@ function renderNotes(){
 function renderDpp(){
   const list = document.getElementById("dpp-list");
   const filter = document.getElementById("category-filter").value;
+  const search = document.getElementById("global-search").value.toLowerCase();
   list.innerHTML = "";
+
+  let hasResults = false;
 
   Object.entries(allDpp).forEach(([id, d]) => {
     if(filter && d.category !== filter) return;
+    if(search && !d.title.toLowerCase().includes(search)) return;
+
+    hasResults = true;
 
     list.innerHTML += `
-      <div class="card p-3">
-        <p class="font-bold text-sm mb-2">${d.title}</p>
+      <div class="card p-4">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-12 h-12 bg-blue-900 rounded-lg flex items-center justify-center">
+            <i class="fas fa-book text-blue-300 text-xl"></i>
+          </div>
+          <div>
+            <p class="font-bold text-sm">${d.title}</p>
+            <p class="text-gray-400 text-xs">${d.category || 'General'}</p>
+          </div>
+        </div>
         ${d.url ? 
-          `<a href="${d.url}" target="_blank" class="open-link text-xs">Open DPP</a>` : 
-          '<p class="text-gray-500 text-xs">Link coming soon</p>'
+          `<a href="${d.url}" target="_blank" class="open-link text-xs flex items-center justify-center gap-2" style="background:linear-gradient(90deg,#3b82f6,#1d4ed8);">
+            <i class="fas fa-external-link-alt"></i> Open DPP
+          </a>` : 
+          '<p class="text-gray-500 text-xs text-center">Link coming soon</p>'
         }
       </div>
     `;
   });
   
-  if(list.innerHTML === "") {
-    list.innerHTML = `<p class="col-span-2 text-center text-gray-400 p-4">No DPP found</p>`;
+  if(!hasResults) {
+    list.innerHTML = `
+      <div class="col-span-2 text-center p-8">
+        <i class="fas fa-book text-4xl text-gray-400 mb-3"></i>
+        <p class="text-gray-400">No DPPs found</p>
+        ${search ? '<p class="text-sm text-gray-500 mt-1">Try a different search term</p>' : ''}
+      </div>
+    `;
   }
 }
 
@@ -944,26 +1272,34 @@ function renderDpp(){
 function renderAllLectures() {
   const grid = document.getElementById("lectures-grid-container");
   const countElement = document.getElementById("lecture-count");
+  const search = document.getElementById("global-search").value.toLowerCase();
   
   // Convert to array
   const lecturesArray = Object.entries(allLectures);
   
-  // Update count
-  countElement.textContent = lecturesArray.length;
+  // Filter by search
+  const filteredLectures = search ? lecturesArray.filter(([id, lecture]) => 
+    lecture.title.toLowerCase().includes(search) || 
+    lecture.description.toLowerCase().includes(search) ||
+    lecture.category.toLowerCase().includes(search)
+  ) : lecturesArray;
   
-  if (lecturesArray.length === 0) {
+  // Update count
+  countElement.textContent = filteredLectures.length;
+  
+  if (filteredLectures.length === 0) {
     grid.innerHTML = `
       <div class="no-lectures">
         <i class="fas fa-video-slash text-4xl mb-3"></i>
-        <p>No lectures added yet. Add lectures in Firebase to see them here.</p>
-        <p class="text-sm mt-2">Add lectures in the "lectures" node in your Firebase database</p>
+        <p>No lectures found</p>
+        <p class="text-sm mt-2">${search ? 'Try a different search term' : 'Check back soon for new lectures!'}</p>
       </div>
     `;
     return;
   }
   
-  // Sort by timestamp if available, otherwise show in reverse order (newest first)
-  lecturesArray.sort((a, b) => {
+  // Sort by timestamp if available
+  filteredLectures.sort((a, b) => {
     const timeA = a[1].timestamp || a[1].createdAt || 0;
     const timeB = b[1].timestamp || b[1].createdAt || 0;
     return timeB - timeA; // Newest first
@@ -973,9 +1309,9 @@ function renderAllLectures() {
   grid.innerHTML = '';
   
   // Display all lectures in grid
-  lecturesArray.forEach(([id, lecture]) => {
+  filteredLectures.forEach(([id, lecture]) => {
     const videoId = extractVideoIdFromUrl(lecture.videoUrl || lecture.url || lecture.watchLink);
-    if (!videoId) return; // Skip if no valid video ID
+    if (!videoId) return;
     
     // Get YouTube thumbnail
     const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
@@ -983,7 +1319,7 @@ function renderAllLectures() {
     // Get subject/tag
     const subject = lecture.subject || lecture.category || 'General';
     
-    // Format description (limit length)
+    // Format description
     const description = lecture.description 
       ? (lecture.description.length > 100 
         ? lecture.description.substring(0, 100) + '...' 
@@ -1002,8 +1338,8 @@ function renderAllLectures() {
           
           <div class="lecture-card-meta">
             <span class="lecture-card-subject">${subject}</span>
-            <span class="text-xs text-gray-400">
-              ${lecture.duration || '--:--'}
+            <span class="text-xs text-gray-400 flex items-center gap-1">
+              <i class="far fa-clock"></i> ${lecture.duration || '--:--'}
             </span>
           </div>
           
@@ -1017,7 +1353,17 @@ function renderAllLectures() {
   });
 }
 
-let firstLoad = true;
+// Search functionality
+document.getElementById('global-search').addEventListener('input', function() {
+  renderAll();
+});
+
+function renderAll() {
+  renderProjects();
+  renderNotes();
+  renderDpp();
+  renderAllLectures();
+}
 
 // ----------- LIVE FIREBASE DATA ----------- 
 function startLive() {
@@ -1068,7 +1414,7 @@ function startLive() {
     renderDpp();
   });
 
-  // Load ALL lectures from Firebase
+  // Load lectures
   db.ref("lectures").on("value", snap => {
     const oldCount = Object.keys(allLectures).length;
     allLectures = snap.val() || {};
@@ -1086,88 +1432,35 @@ function startLive() {
       openPopup(lastItem.title || "New Lecture Added", thumbnail);
     }
     
-    // Render all lectures in grid
     renderAllLectures();
-    
-    // Auto-play first lecture if none is playing
-    if (lecturePlayer && (!lecturePlayer.getVideoData || !lecturePlayer.getVideoData().video_id)) {
-      const lecturesArray = Object.values(allLectures);
-      if (lecturesArray.length > 0) {
-        const firstLecture = lecturesArray[0];
-        const videoId = extractVideoIdFromUrl(firstLecture.videoUrl || firstLecture.url || firstLecture.watchLink);
-        if (videoId && !document.getElementById('lectureUrl').value) {
-          document.getElementById('lectureUrl').value = videoId;
-          if (lecturePlayer.loadVideoById) {
-            lecturePlayer.loadVideoById(videoId);
-          }
-        }
-      }
-    }
   });
 
-  // Load notifications
+  // Load scheduled notifications from Firebase
   db.ref("notifications").on("value", snap => {
     allNotifications = snap.val() || {};
+  });
+
+  // Load notification history from Firebase
+  db.ref("notification_history").on("value", snap => {
+    const history = snap.val() || {};
+    const now = Date.now();
+    const oneDayAgo = now - (24 * 60 * 60 * 1000);
     
-    // Load existing notifications from localStorage
-    loadSavedNotifications();
-    
-    // Start checking for scheduled notifications
-    setInterval(checkScheduledNotifications, 60000); // Check every minute
+    Object.entries(history).forEach(([id, notification]) => {
+      // Only show notifications from last 24 hours that we haven't seen
+      if (notification.timestamp > oneDayAgo) {
+        const notificationKey = `seen_${id}`;
+        const hasSeen = localStorage.getItem(notificationKey);
+        
+        if (!hasSeen) {
+          addNotificationToHistory(notification);
+          localStorage.setItem(notificationKey, 'true');
+        }
+      }
+    });
   });
 
   firstLoad = false;
-}
-
-// Load saved notifications from localStorage
-function loadSavedNotifications() {
-  const saved = localStorage.getItem('project45_notifications');
-  if (saved) {
-    try {
-      const notifications = JSON.parse(saved);
-      const notificationList = document.getElementById('notification-list');
-      
-      if (notifications.length > 0) {
-        notificationList.innerHTML = '';
-        notifications.forEach(notif => {
-          const div = document.createElement('div');
-          div.className = 'notification-item';
-          if (notif.unread) div.classList.add('unread');
-          
-          div.innerHTML = `
-            <div class="notification-title">${notif.title}</div>
-            <div class="notification-message">${notif.message}</div>
-            <div class="notification-time">${notif.time}</div>
-          `;
-          
-          notificationList.appendChild(div);
-        });
-      }
-    } catch (e) {
-      console.error('Error loading saved notifications:', e);
-    }
-  }
-}
-
-// Save notifications to localStorage
-function saveNotifications() {
-  const notifications = [];
-  document.querySelectorAll('.notification-item').forEach(item => {
-    const title = item.querySelector('.notification-title').textContent;
-    const message = item.querySelector('.notification-message').textContent;
-    const time = item.querySelector('.notification-time').textContent;
-    const unread = item.classList.contains('unread');
-    
-    notifications.push({ title, message, time, unread });
-  });
-  
-  localStorage.setItem('project45_notifications', JSON.stringify(notifications));
-}
-
-function renderAll() {
-  renderProjects();
-  renderNotes();
-  renderDpp();
 }
 
 // ================= LECTURE PLAYER =================
@@ -1221,7 +1514,6 @@ function onYouTubeIframeAPIReady() {
 
 function onLecturePlayerReady(event) {
   console.log("Lecture Player ready");
-  // Set initial playback speed
   event.target.setPlaybackRate(currentSpeed);
   
   // Load first lecture if available
@@ -1297,6 +1589,14 @@ function skipForward() {
 
 // INITIALIZE EVERYTHING
 window.onload = function() {
+  // Load saved notifications first
+  loadSavedNotifications();
+  initNotificationBadge();
+  
+  // Request notification permission
+  requestNotificationPermission();
+  
+  // Load all data
   loadBanners();
   loadCategories();
   startLive();
@@ -1304,20 +1604,10 @@ window.onload = function() {
   // Show projects by default
   showSection('projects');
   
-  // Request notification permission
-  requestNotificationPermission();
-  
-  // Add error handling for popup image
+  // Add error handling for images
   document.getElementById('popup-thumb').onerror = function() {
-    this.src = "https://via.placeholder.com/350x180/0f1b33/10b981?text=Content+Added";
+    this.src = "https://via.placeholder.com/350x180/0f1b33/10b981?text=New+Content";
   };
-  
-  // Add error handling for lecture thumbnails
-  document.addEventListener('error', function(e) {
-    if (e.target.classList.contains('lecture-thumbnail')) {
-      e.target.src = 'https://via.placeholder.com/300x180/0f1b33/10b981?text=Lecture';
-    }
-  }, true);
   
   // Close notification panel when clicking outside
   document.addEventListener('click', function(event) {
@@ -1331,12 +1621,43 @@ window.onload = function() {
     }
   });
   
-  // Test notification (can be removed)
-  setTimeout(() => {
-    showNotification("Welcome to Project 45!", "Start exploring study resources and lectures. Good luck with your preparation!");
-  }, 2000);
+  // Show welcome notification on first visit
+  const hasVisited = localStorage.getItem('project45_has_visited');
+  if (!hasVisited) {
+    setTimeout(() => {
+      addNotificationToHistory({
+        title: "Welcome to Project 45! 👋",
+        message: "Start exploring study resources and lectures. We'll send you study reminders throughout the day!",
+        icon: "🎓",
+        type: "welcome"
+      });
+      localStorage.setItem('project45_has_visited', 'true');
+    }, 3000);
+  }
+  
+  // Check for scheduled notifications every minute
+  setInterval(() => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    
+    Object.values(allNotifications || {}).forEach(notification => {
+      if (notification.active && 
+          notification.hour === currentHour && 
+          notification.minute === currentMinute) {
+        
+        // Check if we already showed this notification today
+        const notificationKey = `notif_${notification.hour}_${notification.minute}_${now.toDateString()}`;
+        const hasShown = localStorage.getItem(notificationKey);
+        
+        if (!hasShown) {
+          addNotificationToHistory(notification);
+          localStorage.setItem(notificationKey, 'true');
+        }
+      }
+    });
+  }, 60000); // Check every minute
 };
 </script>
-
 </body>
 </html>
